@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import CustomUser, Todo
-from rest_framework import generics, status
+from rest_framework import generics, status, mixins
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, MyTokenObtainPairSerializer, TodoSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -74,6 +74,8 @@ class ProfileView(APIView):
 #     serializer = NoteSerializer(notes, many=True)
 #     return Response(serializer.data) 
 
+
+#Create
 class CreateTodo(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -93,14 +95,35 @@ class CreateTodo(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-def update_todo(request):
-    pass
 
 
+#Read
 class TodoList(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Todo.objects.all()
     serializer_class = TodoSerializer
 
 
+class GetTodoByID(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        todo = get_object_or_404(Todo, pk=pk)
+        data = TodoSerializer(todo).data
+        return Response(data)
+
+
+#Update
+class UpdateTodo(mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+
+#Delete
+class DeleteTodo(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
