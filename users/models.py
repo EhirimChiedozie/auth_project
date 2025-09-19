@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 # Create your models here.
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
@@ -13,5 +14,5 @@ class Todo(models.Model):
     task = models.CharField(max_length=255, blank=False)
     description = models.TextField()
     status = models.BooleanField(default=False)
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_posted = models.DateTimeField(auto_now=True)
     deadline_day = models.DateField(max_length=255)
